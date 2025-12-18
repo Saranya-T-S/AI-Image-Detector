@@ -18,7 +18,6 @@ This project implements a deep learning-based system to detect AI-generated imag
 - novelty.h5 – Trained model for AI image detection.
 - ai_detector_gui.py – Tkinter GUI for real-time image authenticity verification.
 - ai_img_detector.py – Feature extraction module.
-- demo_video.mp4 – Demo of GUI in action.
 
 **Dataset Details**
 - For AI-Generated Images:(1219)
