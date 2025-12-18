@@ -1,5 +1,4 @@
 # ai_image_detector_ela_prnu_fusion.py
-# Complete working code with ELA+PRNU fusion mode (without FFT)
 
 import argparse
 import os
@@ -56,9 +55,7 @@ def to_numpy(im: Image.Image) -> np.ndarray:
 # Feature Extraction
 # ---------------------------
 def extract_prnu_enhanced(rgb: np.ndarray) -> np.ndarray:
-    """Extract Photo Response Non-Uniformity noise pattern"""
     gray = cv2.cvtColor(rgb, cv2.COLOR_RGB2GRAY).astype(np.float32)/255.0
-    
     # Wavelet decomposition for denoising
     coeffs = pywt.wavedec2(gray, 'db4', level=2)
     cA = coeffs[0]
@@ -83,7 +80,7 @@ def extract_prnu_enhanced(rgb: np.ndarray) -> np.ndarray:
     return residual.astype(np.float32)
 
 def extract_ela_enhanced(rgb: np.ndarray, quality: int = 95) -> np.ndarray:
-    """Extract Error Level Analysis features"""
+    
     bgr = cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
     result, encimg = cv2.imencode('.jpg', bgr, [int(cv2.IMWRITE_JPEG_QUALITY), quality])
     if not result:
@@ -93,7 +90,6 @@ def extract_ela_enhanced(rgb: np.ndarray, quality: int = 95) -> np.ndarray:
     dec = cv2.cvtColor(dec, cv2.COLOR_BGR2RGB)
     diff = cv2.absdiff(rgb, dec).astype(np.float32)
     
-    # Enhanced ELA with per-channel normalization
     ela_channels = []
     for c in range(3):
         channel_diff = diff[:, :, c]
@@ -105,7 +101,7 @@ def extract_ela_enhanced(rgb: np.ndarray, quality: int = 95) -> np.ndarray:
     return ela
 
 def extract_fft_spectrum(rgb: np.ndarray) -> np.ndarray:
-    """Extract FFT magnitude spectrum"""
+    
     gray = cv2.cvtColor(rgb, cv2.COLOR_RGB2GRAY).astype(np.float32)
     fft = fft2(gray)
     fft_shifted = fftshift(fft)
@@ -115,7 +111,7 @@ def extract_fft_spectrum(rgb: np.ndarray) -> np.ndarray:
     return magnitude_db.astype(np.float32)
 
 def extract_noise_residual(rgb: np.ndarray) -> np.ndarray:
-    """Extract combined noise residual from multiple denoising techniques"""
+    
     gray = cv2.cvtColor(rgb, cv2.COLOR_RGB2GRAY).astype(np.float32)/255.0
     denoised_median = cv2.medianBlur((gray*255).astype(np.uint8), 5)/255.0
     denoised_bilateral = cv2.bilateralFilter((gray*255).astype(np.uint8), 9, 75, 75)/255.0
@@ -126,7 +122,7 @@ def extract_noise_residual(rgb: np.ndarray) -> np.ndarray:
     return combined_residual.astype(np.float32)
 
 def make_feature(rgb: np.ndarray, mode: str) -> np.ndarray:
-    """Generate feature maps based on selected mode"""
+    
     if mode == "prnu":
         return extract_prnu_enhanced(rgb)[..., None]
     
@@ -160,7 +156,7 @@ def make_feature(rgb: np.ndarray, mode: str) -> np.ndarray:
 # CNN Architecture
 # ---------------------------
 def build_cnn_standard(input_shape):
-    """Build standard CNN for binary classification"""
+    
     inp = tf.keras.Input(shape=input_shape)
     x = tf.keras.layers.Conv2D(32, 3, padding="same", activation="relu")(inp)
     x = tf.keras.layers.MaxPool2D(2)(x)
@@ -179,10 +175,8 @@ def build_cnn_standard(input_shape):
 # Dataset Creation
 # ---------------------------
 def make_dataset(paths, labels, img_size, feature_mode, batch_size, shuffle=True):
-    """Create TensorFlow dataset with feature extraction pipeline"""
+  
     H, W = img_size[1], img_size[0]
-    
-    # Determine number of channels based on mode
     if feature_mode == "fusion_ela_prnu":
         C = 4  # ELA (3) + PRNU (1)
     elif feature_mode == "fusion_advanced":
@@ -222,11 +216,10 @@ def make_dataset(paths, labels, img_size, feature_mode, batch_size, shuffle=True
 # Training & Evaluation
 # ---------------------------
 def train_eval(args):
-    """Main training and evaluation pipeline"""
+    
     np.random.seed(args.seed)
     tf.random.set_seed(args.seed)
 
-    # Load images safely
     print("Loading image paths...")
     try:
         ai_paths = list_images(args.ai_dir)
@@ -235,8 +228,7 @@ def train_eval(args):
     except FileNotFoundError as e:
         print(f"Error: {e}")
         return
-    
-    # Balance dataset if requested
+       
     if args.balance:
         n = min(len(ai_paths), len(real_paths))
         ai_paths, real_paths = ai_paths[:n], real_paths[:n]
@@ -245,18 +237,15 @@ def train_eval(args):
     all_paths = ai_paths + real_paths
     all_labels = [1]*len(ai_paths) + [0]*len(real_paths)
 
-    # Split dataset
     train_paths, val_paths, train_labels, val_labels = train_test_split(
         all_paths, all_labels, test_size=0.2, random_state=args.seed, stratify=all_labels
     )
     print(f"Training samples: {len(train_paths)}, Validation samples: {len(val_paths)}")
 
-    # Create datasets
     print(f"Creating datasets with feature mode: {args.feature_mode}")
     ds_train = make_dataset(train_paths, train_labels, args.img_size, args.feature_mode, args.batch_size)
     ds_val = make_dataset(val_paths, val_labels, args.img_size, args.feature_mode, args.batch_size, shuffle=False)
 
-    # Determine input channels
     if args.feature_mode == "fusion_ela_prnu":
         in_channels = 4
     elif args.feature_mode == "fusion_advanced":
@@ -269,7 +258,6 @@ def train_eval(args):
     input_shape = (args.img_size[1], args.img_size[0], in_channels)
     print(f"Input shape: {input_shape}")
     
-    # Build model
     model = build_cnn_standard(input_shape)
     model.compile(
         optimizer=tf.keras.optimizers.Adam(args.lr),
@@ -278,13 +266,11 @@ def train_eval(args):
     )
     model.summary()
 
-    # Create output directory
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     out_dir = Path(f"./outputs/{timestamp}_{args.feature_mode}")
     out_dir.mkdir(parents=True, exist_ok=True)
     print(f"Output directory: {out_dir.resolve()}")
 
-    # Callbacks
     callbacks = [
         tf.keras.callbacks.ModelCheckpoint(
             str(out_dir / f"best_model_{args.feature_mode}.h5"),
@@ -306,7 +292,6 @@ def train_eval(args):
         )
     ]
 
-    # Train
     print("\nStarting training...")
     history = model.fit(
         ds_train,
@@ -316,12 +301,10 @@ def train_eval(args):
         verbose=1
     )
     
-    # Save final model and history
     model.save(out_dir / f"final_model_{args.feature_mode}.h5")
     pd.DataFrame(history.history).to_csv(out_dir / f"history_{args.feature_mode}.csv", index=False)
     print(f"Model saved to: {out_dir}")
 
-    # Evaluate
     print("\nEvaluating model...")
     y_true, y_pred, y_proba = [], [], []
     for xb, yb in ds_val:
@@ -335,7 +318,6 @@ def train_eval(args):
     y_pred = np.concatenate(y_pred)
     y_proba = np.concatenate(y_proba)
 
-    # Save results
     cm = confusion_matrix(y_true, y_pred)
     cr = classification_report(y_true, y_pred, digits=4, target_names=["Real", "AI"])
     
@@ -345,7 +327,6 @@ def train_eval(args):
     with open(out_dir / f"classification_report_{args.feature_mode}.txt", "w") as f:
         f.write(cr)
     
-    # Save predictions
     results_df = pd.DataFrame({
         'true_label': y_true,
         'predicted_label': y_pred,
@@ -391,4 +372,5 @@ if __name__ == "__main__":
     print(f"Balance Dataset: {args.balance}")
     print("="*50 + "\n")
     
+
     train_eval(args)
