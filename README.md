@@ -4,17 +4,17 @@ This project implements a deep learning-based system to detect AI-generated imag
 
 **Project Files**
 
--novelty.h5 – Trained model for AI image detection.
--ai_detector_gui.py – Tkinter GUI for real-time image authenticity verification.
--ai_img_detector.py – Feature extraction module.
--demo_video.mp4 – Demo of GUI in action.
+- novelty.h5 – Trained model for AI image detection.
+- ai_detector_gui.py – Tkinter GUI for real-time image authenticity verification.
+- ai_img_detector.py – Feature extraction module.
+- demo_video.mp4 – Demo of GUI in action.
 
 **Python Environment**
 
--TensorFlow 2.17
--Keras 3.10
--NumPy 1.26
--Other dependencies: OpenCV, Pillow, scikit-learn, pandas.
+- TensorFlow 2.17
+- Keras 3.10
+- NumPy 1.26
+- Other dependencies: OpenCV, Pillow, scikit-learn, pandas.
 
 **Key Achievements**
 
@@ -24,8 +24,8 @@ This project implements a deep learning-based system to detect AI-generated imag
 
 **Future Work**
 
--Update models with newer AI-generated datasets (Midjourney, DALL-E 3, etc.).
--Explore advanced architectures: ResNet, Vision Transformers, EfficientNet.
--Apply data augmentation to increase dataset size and diversity for better training.
--Perform hyperparameter fine-tuning: learning rate, batch size, dropout, number of layers.
--Use Grad-CAM visualizations for model interpretability.
+- Update models with newer AI-generated datasets (Midjourney, DALL-E 3, etc.).
+- Explore advanced architectures: ResNet, Vision Transformers, EfficientNet.
+- Apply data augmentation to increase dataset size and diversity for better training.
+- Perform hyperparameter fine-tuning: learning rate, batch size, dropout, number of layers.
+- Use Grad-CAM visualizations for model interpretability.
