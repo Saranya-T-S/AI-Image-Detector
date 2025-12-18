@@ -10,7 +10,9 @@ This project implements a deep learning-based system to detect AI-generated imag
 - 126180029 - Chethana Nagalli, Electronics Engineering (VLSI)
 
 **Demo Video**
-Demo.mp4
+[Watch Demo on Google Drive](https://drive.google.com/file/d/1V2VyVi1Z2mC7R4HnmD-AibJufg81XGZX/view?usp=sharing)
+
+
 **Project Files**
 
 - novelty.h5 – Trained model for AI image detection.
