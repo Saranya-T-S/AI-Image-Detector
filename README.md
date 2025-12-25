@@ -39,7 +39,7 @@ https://www.kaggle.com/datasets/dibyarupdutta/dmimagesubset
 - Successfully developed a deep learning system to detect AI-generated images using features like ELA, PRNU, FFT, and noise residuals.
 - Achieved 97.54% accuracy with the Fusion Advanced Model (CNN + ELA + PRNU + FFT + Noise Removal).
 - Developed a user-friendly Tkinter GUI for real-time image authenticity verification.
-
+- 
 **Future Work**
 
 - Update models with newer AI-generated datasets (Midjourney, DALL-E 3, etc.).
